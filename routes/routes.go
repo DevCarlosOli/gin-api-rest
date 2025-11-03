@@ -1,0 +1,14 @@
+package routes
+
+import (
+	"github.com/DevCarlosOli/gin-api-rest/controllers"
+	"github.com/gin-gonic/gin"
+)
+
+func HandleRequests() {
+	r := gin.Default()
+	r.GET("/alunos", controllers.RetornaTodosOsAlunos)
+	r.GET("/:nome", controllers.Saudacao)
+	r.POST("/alunos", controllers.CriaNovoAluno)
+	r.Run()
+}
