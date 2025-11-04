@@ -44,5 +44,6 @@ require (
 	golang.org/x/text v0.30.0 // indirect
 	golang.org/x/tools v0.38.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
+	gopkg.in/validator.v2 v2.0.1 // indirect
 	gorm.io/gorm v1.31.1 // indirect
 )
