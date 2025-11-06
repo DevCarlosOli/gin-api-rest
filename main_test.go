@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/DevCarlosOli/gin-api-rest/controllers"
@@ -66,4 +69,49 @@ func TestBuscaAlunoPorCPFHandler(t *testing.T) {
 	response := httptest.NewRecorder()
 	r.ServeHTTP(response, req)
 	assert.Equal(t, http.StatusOK, response.Code)
+}
+
+func TestBuscaAlunoPorIDHandler(t *testing.T) {
+	database.ConectaComBancoDeDados()
+	CriaAlunoMock()
+	defer DeletaAlunoMock()
+	r := SetupDasRotasDeTeste()
+	r.GET("/alunos/:id", controllers.BuscaAlunoPorID)
+	pathDaBusca := "/alunos/" + strconv.Itoa(ID)
+	req, _ := http.NewRequest("GET", pathDaBusca, nil)
+	response := httptest.NewRecorder()
+	r.ServeHTTP(response, req)
+	var alunoMock models.Aluno
+	json.Unmarshal(response.Body.Bytes(), &alunoMock)
+	assert.Equal(t, "Fulano Teste", alunoMock.Nome)
+}
+
+func TestDeletaAlunoHandler(t *testing.T) {
+	database.ConectaComBancoDeDados()
+	CriaAlunoMock()
+	r := SetupDasRotasDeTeste()
+	r.DELETE("/alunos/:id", controllers.DeletaAluno)
+	pathDaBusca := "/alunos/" + strconv.Itoa(ID)
+	req, _ := http.NewRequest("DELETE", pathDaBusca, nil)
+	response := httptest.NewRecorder()
+	r.ServeHTTP(response, req)
+	assert.Equal(t, http.StatusOK, response.Code)
+}
+
+func TestEditaUmAlunoHandler(t *testing.T) {
+	database.ConectaComBancoDeDados()
+	CriaAlunoMock()
+	defer DeletaAlunoMock()
+	r := SetupDasRotasDeTeste()
+	r.PATCH("/alunos/:id", controllers.EditaAluno)
+	aluno := models.Aluno{Nome: "Fulano Teste", CPF: "01234567893", RG: "123456780"}
+	valorJson, _ := json.Marshal(aluno)
+	pathParaEditar := "/alunos/" + strconv.Itoa(ID)
+	req, _ := http.NewRequest("PATCH", pathParaEditar, bytes.NewBuffer(valorJson))
+	response := httptest.NewRecorder()
+	r.ServeHTTP(response, req)
+	var alunoMockAtualizado models.Aluno
+	json.Unmarshal(response.Body.Bytes(), &alunoMockAtualizado)
+	assert.Equal(t, aluno.CPF, alunoMockAtualizado.CPF)
+	assert.Equal(t, aluno.RG, alunoMockAtualizado.RG)
 }
